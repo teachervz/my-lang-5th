@@ -575,6 +575,30 @@ body.idle #controls{transform:translate(-50%,30px)}
   opacity:0;pointer-events:none;transition:opacity .4s}
 .flip-dim.show{opacity:1;pointer-events:auto}
 
+/* التقييم الذاتي بدون واجب: البطاقة في الوسط وأكبر */
+.exit.solo{justify-content:center;align-items:center}
+.exit.solo .self{flex:none;width:1150px;padding:50px 40px;gap:40px}
+.exit.solo .self-q{font-size:56px}
+.exit.solo .emo{width:300px;padding:26px 10px}
+.exit.solo .emo .e{font-size:120px}
+.exit.solo .emo .l{font-size:36px}
+
+/* الختام: تنبيه بأنّ الواجب على المنصّة */
+.cl-hw-note{font:800 44px var(--f-ui);color:var(--p800);background:var(--y200);border:4px dashed var(--y500);
+  padding:16px 50px;border-radius:99px;box-shadow:var(--shadow)}
+
+/* الختام مع بطاقة الواجب */
+.closing.with-hw{gap:12px}
+.with-hw .cl-emoji{font-size:84px}
+.with-hw .cl-title{font-size:84px;line-height:1.3}
+.with-hw .cl-msg{font-size:36px;line-height:1.6}
+.with-hw .btn.big{font-size:38px;padding:14px 54px}
+.cl-hw{width:1300px;padding:14px 40px;text-align:start;background:var(--y100);border-color:var(--y300)}
+.cl-hw h3{margin:0 0 6px;text-align:center;font:800 36px var(--f-ui);color:var(--p800)}
+.cl-hw ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.cl-hw li{font:700 32px/1.6 var(--f-text);display:flex;gap:14px;align-items:center}
+.cl-hw li .n{width:44px;height:44px;flex:none;border-radius:50%;background:var(--p600);color:#fff;display:grid;place-items:center;font:900 24px var(--f-ui)}
+
 /* الجداول */
 .tbl.t2{gap:8px;align-content:start}
 .tbl.t2 .th{font-size:30px;padding:8px}
@@ -1059,13 +1083,7 @@ const SLIDES = [
   { type:'exit', anim:'slide', strategy:'🪞 تقييمٌ ذاتيّ',
     title:'كيفَ كانَ درسُنا؟',
     question:'قيّمي فهمَكِ لدرسِ اليومِ:',
-    options:[ { e:'😍', l:'فهمتُ تمامًا' }, { e:'🙂', l:'فهمتُ أغلبَه' }, { e:'🤔', l:'أحتاجُ مساعدةً' } ],
-    homeworkTitle:'🏠 الواجبُ المنزليُّ (ص ٩٦ – ٩٧)',
-    homework:[
-      'أكتبُ جملًا مفيدةً تتضمّنُ: فاعلًا علامةُ رفعِه *الألفُ*، وجمعَ تكسيرٍ يقعُ فاعلًا.',
-      'أختارُ الفاعلَ المناسبَ ممّا بينَ الأقواسِ: (الغوّاصونَ، المعالمُ، المُمرّضتانِ).',
-      'أُحوِّلُ الفاعلَ وَفقَ المطلوبِ مع مراعاةِ العلامةِ الإعرابيّةِ.',
-    ] },
+    options:[ { e:'😍', l:'فهمتُ تمامًا' }, { e:'🙂', l:'فهمتُ أغلبَه' }, { e:'🤔', l:'أحتاجُ مساعدةً' } ] },
 
   /* ㉙ الختام */
   { type:'closing', anim:'zoom',
@@ -1073,7 +1091,7 @@ const SLIDES = [
     emoji:'🏆',
     title:'أنتنَّ مُبدعاتٌ رائعات!',
     message:'تعلّمنا أنّ الفاعلَ يُرفَعُ *بالضّمّةِ* أصلًا، وينوبُ عنها *الألفُ* في المثنّى، و*الواوُ* في جمعِ المذكّرِ السّالمِ والأسماءِ الخمسةِ 💖',
-    quote:'كوني دائمًا مرفوعةَ الهمّةِ.. كالفاعلِ تمامًا 🌟',
+    homeworkTitle:'📌 الواجبُ على منصّةِ مدرستي',
     clapBtn:'👏 صفّقنَ لأنفسِكنّ' },
 ];
 /* ═══════════════════ نهاية الإعدادات — لا حاجة لتعديل ما بعدها ═══════════════════ */
@@ -1865,6 +1883,37 @@ R.flip = s => {
     h('div', { class: 'flip-grid', style: `--cols:${cols};--rows:${rows}` }, cards),
     dim];
 };
+
+/* التقييم الذاتي — الواجب اختياري (بدونه تتوسّط بطاقة التقييم الشريحة) */
+R.exit = s => [head(s),
+  h('div', { class: 'exit' + (s.homework ? '' : ' solo') },
+    h('div', { class: 'self card rv' },
+      rich(s.question, 'p', 'self-q'),
+      h('div', { class: 'emos' }, s.options.map(o => {
+        let n = 0; const c = h('span', { class: 'c' }, ar(0));
+        return h('button', { type: 'button', class: 'emo', onclick: () => {
+          c.textContent = ar(++n); c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); sfx.pop();
+        } }, h('span', { class: 'e' }, o.e), h('span', { class: 'l' }, o.l), c);
+      }))),
+    s.homework ? h('div', { class: 'hw card rv' },
+      rich(s.homeworkTitle, 'h3'),
+      h('ol', {}, s.homework.map((t, i) => h('li', {}, h('span', { class: 'n' }, ar(i + 1)), rich(t, 'span', 'li-t'))))) : null),
+];
+
+/* الختام — مع بطاقة واجب اختيارية (homework) */
+R.closing = s => [
+  h('div', { class: 'closing' + (s.homework ? ' with-hw' : '') },
+    h('div', { class: 'cl-emoji rv' }, s.emoji),
+    rich(s.title, 'h1', 'cl-title rv'),
+    rich(s.message, 'p', 'cl-msg rv'),
+    s.homework ? h('div', { class: 'cl-hw card rv' },
+      rich(s.homeworkTitle, 'h3'),
+      h('ol', {}, s.homework.map((t, i) => h('li', {}, h('span', { class: 'n' }, ar(i + 1)), rich(t, 'span', 'li-t'))))) : null,
+    !s.homework && s.homeworkTitle ? rich(s.homeworkTitle, 'div', 'cl-hw-note rv') : null,
+    s.quote ? h('div', { class: 'cl-quote rv' }, s.quote) : null,
+    s.clapBtn ? h('button', { type: 'button', class: 'btn yellow big rv',
+      onclick: () => { clap(); confetti(innerWidth / 2, innerHeight / 3, 140); } }, s.clapBtn) : null),
+];
 
 /* جدول: الخانة النصية تُعرض، والخانة {a:'..'} زرّ «؟» يكشف الإجابة. + بطاقة «أستنتج» */
 R.table = s => {
